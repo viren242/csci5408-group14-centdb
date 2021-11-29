@@ -10,7 +10,6 @@ public class Queries {
 
     public static ConsoleReader reader = new ConsoleReader();
     public static FileReadWrite fileReadWrite = new FileReadWrite();
-    public static State state;
 
     public static void menu (State state) {
 
