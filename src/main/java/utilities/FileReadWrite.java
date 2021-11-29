@@ -1,27 +1,16 @@
 package utilities;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.util.*;
+import java.io.*;
 
 public class FileReadWrite {
 
     public final String rootPath = "src/main/resources/";
 
-    public String getFileName(String type) {
-        switch (type) {
-            case "USER":
-                return rootPath + "USER.txt";
-            default:
-                return rootPath + "FLUSH.txt";
-        }
-    }
-
-    public String readFile(String type) {
+    public String readFile(String path) {
 
         StringBuilder stringBuilder = new StringBuilder();
-        String fileName = getFileName(type);
+        String fileName = rootPath + path + ".data";
 
         try {
 
@@ -42,13 +31,16 @@ public class FileReadWrite {
         return stringBuilder.toString();
     }
 
-    public void writeFile(String type, String content) {
+    public void writeFile(String path, String content) {
 
-        String fileName = getFileName(type);
+        String fileName = rootPath + path + ".data";
 
         try {
 
-            FileWriter fileWriter = new FileWriter(fileName, true);
+            File file = new File(fileName);
+            file.getParentFile().mkdirs();
+
+            FileWriter fileWriter = new FileWriter(file, true);
             PrintWriter printWriter = new PrintWriter(fileWriter);
 
             printWriter.print(content);
@@ -60,6 +52,18 @@ public class FileReadWrite {
             System.out.println("Error writing file: " + fileName);
             e.printStackTrace();
         }
+    }
+
+    public List<String> getDirectories (String path) {
+        List<String> directories = new ArrayList<>();
+        File directory = new File(rootPath + path);
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                directories.add(file.getName());
+            }
+        }
+        return directories;
     }
 
 }

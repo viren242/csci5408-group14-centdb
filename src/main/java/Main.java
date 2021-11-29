@@ -1,3 +1,4 @@
+import queries.Queries;
 import user.User;
 import utilities.ConsoleReader;
 
@@ -49,7 +50,7 @@ public class Main {
 
                 switch (option) {
                     case 1:
-//                        write queries page
+                        Queries.menu();
                         break;
                     case 2:
 //                        export page

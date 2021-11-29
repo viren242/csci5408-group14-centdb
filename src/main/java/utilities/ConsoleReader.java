@@ -10,6 +10,8 @@ public class ConsoleReader {
     }
 
     public int readInt() {
-        return scanner.nextInt();
+        int number = scanner.nextInt();
+        scanner.nextLine();
+        return number;
     }
 }
