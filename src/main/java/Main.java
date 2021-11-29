@@ -1,11 +1,12 @@
 import queries.Queries;
+import state.State;
 import user.User;
 import utilities.ConsoleReader;
 
 public class Main {
 
     public static ConsoleReader reader = new ConsoleReader();
-    public static Boolean userLoggedIn = false;
+    public static State state = new State();
 
     public static void main(String[] args) {
         System.out.println("Welcome to the Database Management System!");
@@ -20,7 +21,7 @@ public class Main {
 
             switch (option) {
                 case 1:
-                    userLoggedIn = User.login();
+                    state.setUserLoggedIn(User.login());
                     break;
                 case 2:
                     User.register();
@@ -32,12 +33,12 @@ public class Main {
                     break;
             }
 
-            if (option == 3 || userLoggedIn) {
+            if (option == 3 || state.getUserLoggedIn()) {
                 break;
             }
         }
 
-        if(userLoggedIn) {
+        if(state.getUserLoggedIn()) {
             while (true) {
                 System.out.println("\n\nPlease select an option:");
                 System.out.println("1. Write Queries");
@@ -50,7 +51,7 @@ public class Main {
 
                 switch (option) {
                     case 1:
-                        Queries.menu();
+                        Queries.menu(state);
                         break;
                     case 2:
 //                        export page
@@ -62,14 +63,14 @@ public class Main {
 //                        analytics page
                         break;
                     case 5:
-                        userLoggedIn = false;
+                        state.setUserLoggedIn(false);
                         break;
                     default:
                         System.out.println("Invalid option!");
                         break;
                 }
 
-                if(option == 5 || !userLoggedIn) {
+                if(option == 5 || !state.getUserLoggedIn()) {
                     break;
                 }
             }

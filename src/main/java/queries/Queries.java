@@ -1,5 +1,6 @@
 package queries;
 
+import state.State;
 import utilities.ConsoleReader;
 import utilities.FileReadWrite;
 
@@ -9,64 +10,27 @@ public class Queries {
 
     public static ConsoleReader reader = new ConsoleReader();
     public static FileReadWrite fileReadWrite = new FileReadWrite();
+    public static State state;
 
-    public static void menu () {
+    public static void menu (State state) {
 
         while (true) {
-            System.out.println("\nSelect Query Type: ");
-            System.out.println("1. Create Database");
-            System.out.println("2. Use Database");
-            System.out.println("3. Create Table");
-            System.out.println("4. Insert Row");
-            System.out.println("5. Select Row");
-            System.out.println("6. Update Row");
-            System.out.println("7. Delete Row");
-            System.out.println("8. Drop Table");
-            System.out.println("9. Go Back");
+            System.out.print("\nQUERY>");
+            String query = reader.readString();
 
-            int choice = reader.readInt();
+            String[] queryParts = query.split(" ");
 
-            switch (choice) {
-                case 1:
-                    createDatabase();
-                    break;
-                case 2:
-//                useDatabase();
-                    break;
-                case 3:
-//                createTable();
-                    break;
-                case 4:
-//                insertRow();
-                    break;
-                case 5:
-//                selectRow();
-                    break;
-                case 6:
-//                updateRow();
-                    break;
-                case 7:
-//                deleteRow();
-                    break;
-                case 8:
-//                dropTable();
-                    break;
-                case 9:
-                    break;
-                default:
-                    System.out.println("Invalid Choice");
-            }
-
-            if (choice == 9) {
+            if(queryParts[0].equalsIgnoreCase("create") && queryParts[1].equalsIgnoreCase("database")) {
+                createDatabase(queryParts[2]);
+            } else if(queryParts[0].equalsIgnoreCase("use") && queryParts[1].equalsIgnoreCase("database")) {
+                useDatabase(queryParts[2], state);
+            } else if(queryParts[0].equalsIgnoreCase("exit")) {
                 break;
             }
         }
     }
 
-    public static void createDatabase () {
-
-        System.out.println("Enter Database Name: ");
-        String databaseName = reader.readString();
+    public static void createDatabase (String databaseName) {
 
         List<String> databaseList = fileReadWrite.getDirectories("databases");
 
@@ -82,5 +46,17 @@ public class Queries {
         fileReadWrite.writeFile("databases/" + databaseName.toUpperCase() + "/METADATA" , metaContent);
 
         System.out.println("Database Created Successfully");
+    }
+
+    public static void useDatabase (String databaseName, State state) {
+
+        List<String> databaseList = fileReadWrite.getDirectories("databases");
+
+        if (!databaseList.contains(databaseName.toUpperCase())) {
+            System.out.println("Database does not exist. Please create a database first.");
+            return;
+        }
+        state.setActiveDatabase(databaseName);
+        System.out.println("Now using database: " + state.getActiveDatabase());
     }
 }
