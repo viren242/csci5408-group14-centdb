@@ -6,7 +6,7 @@ public class State {
     private Boolean userLoggedIn;
 
     public State() {
-
+        this.userLoggedIn = false;
     }
 
     public String getUserName() {
