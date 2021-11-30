@@ -29,6 +29,8 @@ public class Queries {
                 createTable(queryParts[2], state, query);
             } else if (queryParts[0].equalsIgnoreCase("insert") && queryParts[1].equalsIgnoreCase("into")) {
                 insertInto(queryParts[2], state, query);
+            } else if (queryParts[0].equalsIgnoreCase("select")) {
+                select(state, query);
             } else if(queryParts[0].equalsIgnoreCase("exit")) {
                 break;
             }
@@ -183,4 +185,106 @@ public class Queries {
 
         System.out.println("Inserted Successfully");
     }
+
+    public static void select (State state, String query) {
+
+        if(state.getActiveDatabase() == null) {
+            System.out.println("Please use a database first.");
+            return;
+        }
+
+        Pattern pattern;
+        String regex;
+        if(query.contains("where")) {
+            regex = "SELECT(\\s.*)FROM(\\s.*)WHERE(\\s.*)";
+        } else {
+            regex = "SELECT(\\s.*)FROM(\\s.*)|WHERE(\\s.*)";
+        }
+
+        pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(query);
+        String columns = null;
+        String tableName = null;
+        String whereClause = null;
+        String whereColumnName = null;
+        String whereColumnValue = null;
+
+        if(matcher.find()) {
+            columns = matcher.group(1);
+            tableName = matcher.group(2);
+            if(query.contains("where")) {
+                whereClause = matcher.group(3);
+            }
+        } else {
+            System.out.println("Invalid syntax. Please use the following syntax: select <columns> from <tableName> where <condition>");
+        }
+
+        if(whereClause != null) {
+            Pattern pattern2 = Pattern.compile("(\\w+)(\\s*)(=)(\\s*)(\\w+)", Pattern.CASE_INSENSITIVE);
+            Matcher matcher2 = pattern2.matcher(whereClause);
+            if(!matcher2.find()) {
+                System.out.println("Invalid syntax. Please use the following syntax: select <columns> from <tableName> where <condition>");
+            }
+
+            whereColumnName = matcher2.group(1);
+            whereColumnValue = matcher2.group(5);
+        }
+
+        List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
+        assert tableName != null;
+        if (!tableList.contains(tableName.trim().toUpperCase())) {
+            System.out.println("Table does not exist. Please create a table first.");
+            return;
+        }
+
+        List<String> allColumnsList = new ArrayList<>();
+        String tableMetaContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/METADATA");
+        String[] tableMetaParts = tableMetaContent.split("\n");
+        for(String tableMetaPart : tableMetaParts) {
+            if(tableMetaPart.startsWith("COLUMN")) {
+                String[] columnMetaParts = tableMetaPart.split("\\^");
+                String columnName = columnMetaParts[1];
+                allColumnsList.add(columnName);
+            }
+        }
+
+        List<Integer> selectedColumnIndex = new ArrayList<>();
+        StringBuilder tableContent = new StringBuilder();
+        String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
+
+        int columnCount = 0;
+        for(String columnName : allColumnsList) {
+            assert columns != null;
+            if(columns.contains(columnName) || columns.contains("*")) {
+                tableContent.append(columnName).append("\t\t");
+                selectedColumnIndex.add(columnCount);
+            }
+            columnCount++;
+        }
+        tableContent.append("\n");
+
+        String[] tableDataParts = tableDataContent.split("\n");
+        int whereColumnIndex = -1;
+        if(query.contains("where")) {
+            whereColumnIndex = allColumnsList.indexOf(whereColumnName);
+        }
+
+        for(String tableDataPart : tableDataParts) {
+            String[] rowContent = tableDataPart.split("\\^");
+
+            if( !query.contains("where") || (query.contains("where") && rowContent[whereColumnIndex].equals(whereColumnValue))) {
+                int columnIndex = 0;
+                for(String rowContentPart : rowContent) {
+
+                    if(selectedColumnIndex.contains(columnIndex)) {
+                        tableContent.append(rowContentPart).append("\t\t");
+                    }
+                    columnIndex++;
+                }
+                tableContent.append("\n");
+            }
+        }
+        System.out.println(tableContent.toString());
+    }
+
 }
