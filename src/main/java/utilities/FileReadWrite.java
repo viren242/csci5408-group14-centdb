@@ -20,7 +20,7 @@ public class FileReadWrite {
             String currentLine = null;
 
             while ((currentLine = bufferedReader.readLine()) != null) {
-                stringBuilder.append(currentLine + "\n");
+                stringBuilder.append(currentLine).append("\n");
             }
 
             bufferedReader.close();
@@ -58,6 +58,7 @@ public class FileReadWrite {
         List<String> directories = new ArrayList<>();
         File directory = new File(rootPath + path);
         File[] files = directory.listFiles();
+        assert files != null;
         for (File file : files) {
             if (file.isDirectory()) {
                 directories.add(file.getName());
@@ -66,4 +67,25 @@ public class FileReadWrite {
         return directories;
     }
 
+    public void overWriteFile (String path, String content) {
+        String fileName = rootPath + path + ".data";
+
+        try {
+
+            File file = new File(fileName);
+            file.getParentFile().mkdirs();
+
+            FileWriter fileWriter = new FileWriter(file, false);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+
+            printWriter.print(content);
+            printWriter.close();
+
+            fileWriter.close();
+
+        } catch (Exception e) {
+            System.out.println("Error writing file: " + fileName);
+            e.printStackTrace();
+        }
+    }
 }

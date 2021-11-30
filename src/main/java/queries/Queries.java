@@ -31,6 +31,8 @@ public class Queries {
                 insertInto(queryParts[2], state, query);
             } else if (queryParts[0].equalsIgnoreCase("select")) {
                 select(state, query);
+            } else if (queryParts[0].equalsIgnoreCase("update")) {
+                update(state, query);
             } else if(queryParts[0].equalsIgnoreCase("exit")) {
                 break;
             }
@@ -210,10 +212,10 @@ public class Queries {
         String whereColumnValue = null;
 
         if(matcher.find()) {
-            columns = matcher.group(1);
-            tableName = matcher.group(2);
+            columns = matcher.group(1).trim();
+            tableName = matcher.group(2).trim();
             if(query.contains("where")) {
-                whereClause = matcher.group(3);
+                whereClause = matcher.group(3).trim();
             }
         } else {
             System.out.println("Invalid syntax. Please use the following syntax: select <columns> from <tableName> where <condition>");
@@ -285,6 +287,82 @@ public class Queries {
             }
         }
         System.out.println(tableContent.toString());
+    }
+
+    public static void update (State state, String query) {
+        if(state.getActiveDatabase() == null) {
+            System.out.println("Please use a database first.");
+            return;
+        }
+
+        Pattern pattern = Pattern.compile("UPDATE(\\s.*)SET(\\s.*)WHERE(\\s.*)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(query);
+
+        String tableName = null;
+        String setClause = null;
+        String whereClause = null;
+
+        if(matcher.find()) {
+            tableName = matcher.group(1).trim();
+            setClause = matcher.group(2).trim();
+            whereClause = matcher.group(3).trim();
+        } else {
+            System.out.println("Invalid syntax. Please use the following syntax: UPDATE <tableName> SET <columnName> = <value> WHERE <condition>");
+            return;
+        }
+
+        List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
+        if (!tableList.contains(tableName.toUpperCase())) {
+            System.out.println("Table does not exist. Please create a table first.");
+            return;
+        }
+
+        List<String> allColumnsList = new ArrayList<>();
+        String tableMetaContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/METADATA");
+        String[] tableMetaParts = tableMetaContent.split("\n");
+        for(String tableMetaPart : tableMetaParts) {
+            if(tableMetaPart.startsWith("COLUMN")) {
+                String[] columnMetaParts = tableMetaPart.split("\\^");
+                String columnName = columnMetaParts[1];
+                allColumnsList.add(columnName);
+            }
+        }
+
+        String[] setClauseParts = setClause.split("=");
+        String setColumnName = setClauseParts[0];
+        String setColumnValue = setClauseParts[1];
+
+        String[] whereClauseParts = whereClause.split("=");
+        String whereColumnName = whereClauseParts[0];
+        String whereColumnValue = whereClauseParts[1];
+
+        int whereColumnIndex = allColumnsList.indexOf(whereColumnName);
+        int setColumnIndex = allColumnsList.indexOf(setColumnName);
+
+        if(setColumnIndex == -1 || whereColumnIndex == -1) {
+            System.out.println("Invalid syntax. Please use the following syntax: UPDATE <tableName> SET <columnName> = <value> WHERE <condition>");
+            return;
+        }
+
+        String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
+        String[] tableDataParts = tableDataContent.split("\n");
+        List<String> rows = new ArrayList<>(Arrays.asList(tableDataParts));
+
+        for(int i = 0; i < rows.size(); i++) {
+            String[] rowContent = rows.get(i).split("\\^");
+            if(rowContent[whereColumnIndex].equals(whereColumnValue)) {
+                rowContent[setColumnIndex] = setColumnValue;
+                rows.set(i, String.join("^", rowContent));
+            }
+        }
+
+        StringBuilder newTableContent = new StringBuilder();
+        for(String row : rows) {
+            newTableContent.append(row).append("\n");
+        }
+        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", newTableContent.toString());
+
+        System.out.println("Update successful.");
     }
 
 }
