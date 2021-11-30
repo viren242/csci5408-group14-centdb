@@ -10,7 +10,5 @@ public class Test {
         Pattern pattern = Pattern.compile("SELECT(\\s.*)FROM(\\s.*)|WHERE(\\s.*)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher("select * from table");
         FileReadWrite fileReadWrite = new FileReadWrite();
-
-        fileReadWrite.overWriteFile("databases/TESTDB/USERS/DATA", "test");
     }
 }

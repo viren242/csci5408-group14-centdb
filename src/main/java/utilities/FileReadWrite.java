@@ -88,4 +88,18 @@ public class FileReadWrite {
             e.printStackTrace();
         }
     }
+
+    public void deleteDirectory (String path) {
+        File directory = new File(rootPath + path);
+        File[] files = directory.listFiles();
+        assert files != null;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                deleteDirectory(path + "/" + file.getName());
+            } else {
+                file.delete();
+            }
+        }
+        directory.delete();
+    }
 }

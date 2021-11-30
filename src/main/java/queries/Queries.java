@@ -35,6 +35,8 @@ public class Queries {
                 update(state, query);
             } else if (queryParts[0].equalsIgnoreCase("delete")) {
                 delete(state, query);
+            } else if (queryParts[0].equalsIgnoreCase("drop")) {
+                dropTable(state, query);
             } else if(queryParts[0].equalsIgnoreCase("exit")) {
                 break;
             }
@@ -435,4 +437,52 @@ public class Queries {
         System.out.println("Delete successful.");
     }
 
+    public static void dropTable (State state, String query) {
+
+        if(state.getActiveDatabase() == null) {
+            System.out.println("Please use a database first.");
+            return;
+        }
+
+        Pattern pattern = Pattern.compile("DROP\\s*TABLE(\\s.*)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(query);
+
+        String tableName = null;
+
+        if(matcher.find()) {
+            tableName = matcher.group(1).trim();
+        } else {
+            System.out.println("Invalid syntax. Please use the following syntax: DROP TABLE <tableName>");
+            return;
+        }
+
+        List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
+        if (!tableList.contains(tableName.toUpperCase())) {
+            System.out.println("Table does not exist. Please create a table first.");
+            return;
+        }
+
+        fileReadWrite.deleteDirectory("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase());
+
+        String dbMetadata = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/METADATA");
+        String[] dbMetadataParts = dbMetadata.split("\n");
+        List<String> dbMetadataList = new ArrayList<>(Arrays.asList(dbMetadataParts));
+
+        for(int i = 0; i < dbMetadataList.size(); i++) {
+            if(dbMetadataList.get(i).startsWith("TABLE")) {
+                String[] tableMetaParts = dbMetadataList.get(i).split("\\^");
+                if(tableMetaParts[1].equals(tableName)) {
+                    dbMetadataList.remove(i);
+                }
+            }
+        }
+
+        StringBuilder newDbMetadata = new StringBuilder();
+        for(String dbMetadataPart : dbMetadataList) {
+            newDbMetadata.append(dbMetadataPart).append("\n");
+        }
+        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/METADATA", newDbMetadata.toString());
+
+        System.out.println("Drop Table successful.");
+    }
 }
