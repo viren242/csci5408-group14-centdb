@@ -33,13 +33,13 @@ public class User {
 
     public static void register () {
 
-        System.out.println("\nEnter New Username: ");
+        System.out.print("\nEnter New Username: ");
         String username = reader.readString();
-        System.out.println("Enter New Password: ");
+        System.out.print("Enter New Password: ");
         String password = reader.readString();
-        System.out.println("Enter New Security Question: ");
+        System.out.print("Enter New Security Question: ");
         String securityQuestion = reader.readString();
-        System.out.println("Enter New Security Answer: ");
+        System.out.print("Enter New Security Answer: ");
         String securityAnswer = reader.readString();
 
         User user = new User(username, password, securityQuestion, securityAnswer);
@@ -51,9 +51,9 @@ public class User {
 
     public static Boolean login () {
 
-        System.out.println("\nEnter Username: ");
+        System.out.print("\nEnter Username: ");
         String username = reader.readString();
-        System.out.println("Enter Password: ");
+        System.out.print("Enter Password: ");
         String password = reader.readString();
 
         String userData = fileReadWrite.readFile("USER");
@@ -64,7 +64,7 @@ public class User {
             String[] userArray = user.split(",");
             if (username.equals(userArray[0]) && hashedPassword.equals(userArray[1])) {
 
-                System.out.println("Please answer the security question: " + userArray[2]);
+                System.out.print("Please answer the security question \"" + userArray[2] + "\": ");
                 String securityAnswer = reader.readString();
 
                 if (securityAnswer.equals(userArray[3])) {
