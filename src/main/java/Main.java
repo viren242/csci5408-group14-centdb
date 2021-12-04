@@ -2,6 +2,7 @@ import queries.Queries;
 import state.State;
 import user.User;
 import utilities.ConsoleReader;
+import logical.DataModel;
 
 public class Main {
 
@@ -61,7 +62,7 @@ public class Main {
 //                        export page
                             break;
                         case 3:
-//                        data model page
+                        	DataModel.menu();
                             break;
                         case 4:
 //                        analytics page
