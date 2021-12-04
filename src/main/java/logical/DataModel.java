@@ -16,11 +16,15 @@ public class DataModel {
 	        String query = reader.readString();
 	        query = query.toUpperCase();
 	        
+	        if(query.contentEquals("EXIT")) {
+	        	break;
+	        }
+	        
 	        if(databaseExist(query)) {
 	        	createModel(query);
 	        }
 	        else {
-	        	System.out.print("\nTry again>");;
+	        	System.out.print("\nTry again");;
 	        }
 		}
 	}
@@ -39,14 +43,33 @@ public class DataModel {
 	
 	public static void createModel(String databaseName) {
 		String path = "databases/" + databaseName;
+		String dataModelFile = databaseName + "_ERD_MODEL";
+		StringBuilder fileContent = new StringBuilder();
+		fileContent.append("**************************Entity Relationship Diagram for database " + databaseName + "**************************" + "\n\n");
 		List<String> tableNames = fileReadWrite.getDirectories(path);
-		System.out.println(tableNames);
+		fileContent.append("Total number of relations/tables in the database " + databaseName + " = " + tableNames.size() + "\n\n");
+		//System.out.println(tableNames);
 		
 		for(String tableName : tableNames) {
+			int columnNumber = 0;
+			String columnName = "";
 			String tableMetaData = fileReadWrite.readFile(path + "/" + tableName + "/METADATA");
-			System.out.println(tableMetaData);
+			String tableMetaDataParts[];
+			tableMetaDataParts = tableMetaData.split("\n");
+
+			for(String part : tableMetaDataParts) {
+				if(part.contains("TABLE")) {
+					continue;
+				}
+				else if(part.contains("COLUMN")) {
+					columnName = part.substring(part.indexOf("^") + 1).substring(0, part.substring(part.indexOf("^") + 1).indexOf("^"));
+					columnNumber++;
+					
+					fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + "\n");
+				}
+				
+			}
 		}
-	}
-	
-	
+		fileReadWrite.writeFile(dataModelFile, fileContent.toString());
+	}	
 }
