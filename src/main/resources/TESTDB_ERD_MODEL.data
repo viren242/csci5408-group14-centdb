@@ -6,3 +6,19 @@ TABLE NAME: TEST_TABLE :: COLUMN_NAME_1 : cl1
 TABLE NAME: TEST_TABLE :: COLUMN_NAME_2 : cl2
 TABLE NAME: TEST_TABLE :: COLUMN_NAME_3 : cl3
 TABLE NAME: TEST_TABLE :: COLUMN_NAME_4 : cl4
+**************************Entity Relationship Diagram for database TESTDB**************************
+
+Total number of relations/tables in the database TESTDB = 1
+
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_1 : cl1
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_2 : cl2
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_3 : cl3
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_4 : cl4
+**************************Entity Relationship Diagram for database TESTDB**************************
+
+Total number of relations/tables in the database TESTDB = 1
+
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_1 : cl1
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_2 : cl2
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_3 : cl3
+TABLE NAME: TEST_TABLE :: COLUMN_NAME_4 : cl4
