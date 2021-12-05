@@ -15,36 +15,42 @@ public class Queries {
 
     public static ConsoleReader reader = new ConsoleReader();
     public static FileReadWrite fileReadWrite = new FileReadWrite();
+    public static State state;
 
-    public static void menu (State state) {
+    public static void menu (State newState) {
 
         while (true) {
+            state = newState;
             System.out.print("\nQUERY>");
             String query = reader.readString();
 
-            String[] queryParts = query.split(" ");
-
-            if(queryParts[0].equalsIgnoreCase("create") && queryParts[1].equalsIgnoreCase("database")) {
-                createDatabase(queryParts[2]);
-            } else if(queryParts[0].equalsIgnoreCase("use") && queryParts[1].equalsIgnoreCase("database")) {
-                useDatabase(queryParts[2], state);
-            } else if (queryParts[0].equalsIgnoreCase("create") && queryParts[1].equalsIgnoreCase("table")) {
-                createTable(queryParts[2], state, query);
-            } else if (queryParts[0].equalsIgnoreCase("insert") && queryParts[1].equalsIgnoreCase("into")) {
-                insertInto(queryParts[2], state, query);
-            } else if (queryParts[0].equalsIgnoreCase("select")) {
-                select(state, query);
-            } else if (queryParts[0].equalsIgnoreCase("update")) {
-                update(state, query);
-            } else if (queryParts[0].equalsIgnoreCase("delete")) {
-                delete(state, query);
-            } else if (queryParts[0].equalsIgnoreCase("drop")) {
-                dropTable(state, query);
-            } else if(queryParts[0].equalsIgnoreCase("Begin") && queryParts[1].equalsIgnoreCase("Transaction;") ) {
-                Transaction(state);
-            } else if(queryParts[0].equalsIgnoreCase("exit")) {
+            if(query.equalsIgnoreCase("exit")) {
                 break;
+            } else {
+                processQuery(query);
             }
+        }
+    }
+
+    public static void processQuery(String query) {
+        String[] queryParts = query.split(" ");
+
+        if(queryParts[0].equalsIgnoreCase("create") && queryParts[1].equalsIgnoreCase("database")) {
+            createDatabase(queryParts[2]);
+        } else if(queryParts[0].equalsIgnoreCase("use") && queryParts[1].equalsIgnoreCase("database")) {
+            useDatabase(queryParts[2]);
+        } else if (queryParts[0].equalsIgnoreCase("create") && queryParts[1].equalsIgnoreCase("table")) {
+            createTable(queryParts[2], query);
+        } else if (queryParts[0].equalsIgnoreCase("insert") && queryParts[1].equalsIgnoreCase("into")) {
+            insertInto(queryParts[2], query);
+        } else if (queryParts[0].equalsIgnoreCase("select")) {
+            select(query);
+        } else if (queryParts[0].equalsIgnoreCase("update")) {
+            update(query);
+        } else if (queryParts[0].equalsIgnoreCase("delete")) {
+            delete(query);
+        } else if (queryParts[0].equalsIgnoreCase("drop")) {
+            dropTable(query);
         }
     }
 
@@ -64,7 +70,7 @@ public class Queries {
         System.out.println("Database Created Successfully");
     }
 
-    public static void useDatabase (String databaseName, State state) {
+    public static void useDatabase (String databaseName) {
 
         List<String> databaseList = fileReadWrite.getDirectories("databases");
 
@@ -76,7 +82,7 @@ public class Queries {
         System.out.println("Now using database: " + state.getActiveDatabase());
     }
 
-    public static void createTable (String tableName, State state, String query) {
+    public static void createTable (String tableName, String query) {
 
         if(state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
@@ -122,7 +128,7 @@ public class Queries {
         System.out.println("Table Created Successfully");
     }
 
-    public static void insertInto (String tableName, State state, String query) {
+    public static void insertInto (String tableName, String query) {
 
         if(state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
@@ -197,7 +203,7 @@ public class Queries {
         System.out.println("Inserted Successfully");
     }
 
-    public static void select (State state, String query) {
+    public static void select (String query) {
 
         if(state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
@@ -297,7 +303,7 @@ public class Queries {
         System.out.println(tableContent.toString());
     }
 
-    public static void update (State state, String query) {
+    public static void update (String query) {
         if(state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
             return;
@@ -373,7 +379,7 @@ public class Queries {
         System.out.println("Update successful.");
     }
 
-    public static void delete (State state, String query) {
+    public static void delete (String query) {
 
         if(state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
@@ -442,7 +448,7 @@ public class Queries {
         System.out.println("Delete successful.");
     }
 
-    public static void dropTable (State state, String query) {
+    public static void dropTable (String query) {
 
         if(state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");

@@ -1,0 +1,5 @@
+TABLE^test_table
+COLUMN^cl1^text
+COLUMN^cl2^text
+COLUMN^cl3^real
+COLUMN^cl4^int
