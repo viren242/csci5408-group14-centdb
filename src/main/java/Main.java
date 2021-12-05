@@ -1,3 +1,4 @@
+import logGenerator.Logger;
 import queries.Queries;
 import state.State;
 import user.User;
@@ -8,6 +9,7 @@ public class Main {
 
     public static ConsoleReader reader = new ConsoleReader();
     public static State state = new State();
+    public static Logger logger = new Logger();
 
     public static void main(String[] args) {
 
@@ -25,7 +27,7 @@ public class Main {
 
                 switch (option) {
                     case 1:
-                        state.setUserLoggedIn(User.login());
+                        state.setUserLoggedIn(User.login(state));
                         break;
                     case 2:
                         User.register();
@@ -43,6 +45,7 @@ public class Main {
             }
 
             if(state.getUserLoggedIn()) {
+                logger.eventLog("LOGIN", "User logged in.", state);
                 while (true) {
                     System.out.println("\n\nPlease select an option:");
                     System.out.println("1. Write Queries");

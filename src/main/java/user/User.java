@@ -1,5 +1,6 @@
 package user;
 
+import state.State;
 import utilities.ConsoleReader;
 import utilities.FileReadWrite;
 import java.math.BigInteger;
@@ -49,7 +50,7 @@ public class User {
         System.out.println("\nUser Registered Successfully");
     }
 
-    public static Boolean login () {
+    public static Boolean login (State state) {
 
         System.out.print("\nEnter Username: ");
         String username = reader.readString();
@@ -68,6 +69,7 @@ public class User {
                 String securityAnswer = reader.readString();
 
                 if (securityAnswer.equals(userArray[3])) {
+                    state.setUserName(username);
                     System.out.println("\nLogin Successful");
                     return true;
                 }
