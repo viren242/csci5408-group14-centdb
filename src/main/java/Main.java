@@ -19,7 +19,7 @@ public class Main {
                 System.out.println("2. Register");
                 System.out.println("3. Exit");
 
-                System.out.print("\nOption>");
+
                 int option = reader.readInt();
 
                 switch (option) {

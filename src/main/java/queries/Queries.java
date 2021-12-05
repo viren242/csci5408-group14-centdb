@@ -4,6 +4,9 @@ import state.State;
 import utilities.ConsoleReader;
 import utilities.FileReadWrite;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +40,8 @@ public class Queries {
                 delete(state, query);
             } else if (queryParts[0].equalsIgnoreCase("drop")) {
                 dropTable(state, query);
+            } else if(queryParts[0].equalsIgnoreCase("Begin") && queryParts[1].equalsIgnoreCase("Transaction;") ) {
+                Transaction(state);
             } else if(queryParts[0].equalsIgnoreCase("exit")) {
                 break;
             }
@@ -484,5 +489,38 @@ public class Queries {
         fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/METADATA", newDbMetadata.toString());
 
         System.out.println("Drop Table successful.");
+    }
+
+    public static void Transaction(State state){
+        System.out.print("\nTransaction has started");
+        System.out.print("\nTRANSACTION>");
+       // ArrayList<String> transaction = new ArrayList<String>();
+        String transaction = "";
+        String input = null;
+        while (!"Commit;".equalsIgnoreCase(input)) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            try {
+                input = br.readLine();
+            } catch (IOException ioe) {
+                System.out.println("Wrong");
+                System.exit(1);
+            }
+            if (!"Commit;".equalsIgnoreCase(input) && !"Rollback;".equalsIgnoreCase(input))
+                transaction = transaction + input;
+        }
+
+        System.out.println("Transaction = " + transaction);
+        String[] transactionParts = transaction.split(";");
+        String transactionQuery;
+
+
+        for(int i = 0; i< transactionParts.length;i++){
+            System.out.println(transactionParts[i]);
+            transactionQuery = transactionParts[i];
+            String[] transactionQueryParts = transactionQuery.split(" ");
+           // System.out.println(transactionQueryParts[i]);
+        }
+
+
     }
 }
