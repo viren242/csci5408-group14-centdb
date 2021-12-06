@@ -1,3 +1,4 @@
+import export.Export;
 import analytics.Analytics;
 import logGenerator.Logger;
 import queries.Queries;
@@ -12,6 +13,7 @@ public class Main {
     public static State state = new State();
     public static Logger logger = new Logger();
 
+    
     public static void main(String[] args) {
 
         try{
@@ -63,7 +65,7 @@ public class Main {
                             Queries.menu(state);
                             break;
                         case 2:
-//                        export page
+                            Export.show(state);
                             break;
                         case 3:
                         	DataModel.menu();
