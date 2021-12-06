@@ -15,5 +15,9 @@ public class Test {
 //        Map<String, Object> map = new HashMap<>();
 //        map.put("name", "test2");
 //        logs.log(map, "GENERAL1");
+
+
+
+
     }
 }

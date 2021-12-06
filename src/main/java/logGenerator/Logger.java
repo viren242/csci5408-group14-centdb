@@ -26,7 +26,11 @@ public class Logger {
             for (String table : tableList) {
                 JSONObject tableObject = new JSONObject();
 
-                String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + table + "/DATA");
+                String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase().toUpperCase() + "/" + table + "/DATA");
+
+                if(tableDataContent == null){
+                    return;
+                }
 
                 String[] tableDataParts = tableDataContent.split("\n");
 
@@ -53,10 +57,11 @@ public class Logger {
         this.log(log, "EVENT");
     }
 
-    public void queryLog(String query, State state){
+    public void queryLog(String query, State state) {
         JSONObject log = new JSONObject();
         log.put("query", query);
         log.put("database", state.getActiveDatabase());
+        log.put("table", state.getLastUsedTable());
         log.put("timestamp", System.currentTimeMillis());
         log.put("user", state.getUserName());
         this.log(log, "QUERY");

@@ -40,7 +40,6 @@ public class Queries {
         String[] queryParts = query.split(" ");
 
         logger.generalLog(query, state);
-        logger.queryLog(query, state);
         logger.eventLog("QUERY_EXECUTED", "A query was executed: " + query, state);
 
         if (queryParts[0].equalsIgnoreCase("create") && queryParts[1].equalsIgnoreCase("database")) {
@@ -65,6 +64,9 @@ public class Queries {
             Transaction();
             logger.eventLog("TRANSACTION_END", "The transaction has ended", state);
         }
+
+        logger.queryLog(query, state);
+        state.setLastUsedTable("");
     }
 
     public static void createDatabase(String databaseName) {
@@ -96,6 +98,8 @@ public class Queries {
     }
 
     public static void createTable(String tableName, String query) {
+
+        state.setLastUsedTable(tableName);
 
         if (state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
@@ -142,6 +146,8 @@ public class Queries {
     }
 
     public static void insertInto(String tableName, String query) {
+
+        state.setLastUsedTable(tableName);
 
         if (state.getActiveDatabase() == null) {
             System.out.println("Please use a database first.");
@@ -242,6 +248,7 @@ public class Queries {
         if (matcher.find()) {
             columns = matcher.group(1).trim();
             tableName = matcher.group(2).trim();
+            state.setLastUsedTable(tableName);
             if (query.contains("where")) {
                 whereClause = matcher.group(3).trim();
             }
@@ -331,6 +338,7 @@ public class Queries {
 
         if (matcher.find()) {
             tableName = matcher.group(1).trim();
+            state.setLastUsedTable(tableName);
             setClause = matcher.group(2).trim();
             whereClause = matcher.group(3).trim();
         } else {
@@ -407,6 +415,7 @@ public class Queries {
 
         if (matcher.find()) {
             tableName = matcher.group(1).trim();
+            state.setLastUsedTable(tableName);
             whereClause = matcher.group(2).trim();
         } else {
             System.out.println("Invalid syntax. Please use the following syntax: DELETE FROM <tableName> WHERE <condition>");
@@ -475,6 +484,7 @@ public class Queries {
 
         if (matcher.find()) {
             tableName = matcher.group(1).trim();
+            state.setLastUsedTable(tableName);
         } else {
             System.out.println("Invalid syntax. Please use the following syntax: DROP TABLE <tableName>");
             return;

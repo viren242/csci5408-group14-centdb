@@ -15,6 +15,11 @@ public class FileReadWrite {
         StringBuilder stringBuilder = new StringBuilder();
         String fileName = rootPath + path + ".data";
 
+        File file = new File(fileName);
+        if(!file.exists()){
+            return null;
+        }
+
         try {
 
             FileReader fileReader = new FileReader(fileName);
@@ -150,5 +155,40 @@ public class FileReadWrite {
             System.out.println("Error writing file: " + fileName);
             e.printStackTrace();
         }
+    }
+
+    public JSONObject readLogFile(String path){
+        String fileName = rootPath + path + ".json";
+
+        try {
+            File file = new File(fileName);
+            file.getParentFile().mkdirs();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            JSONObject fileContents = null;
+
+            if (file.exists()) {
+                FileReader fileReader = new FileReader(fileName);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                String currentLine = null;
+                while ((currentLine = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(currentLine).append("\n");
+                }
+                bufferedReader.close();
+                if (stringBuilder.length() > 0) {
+                    fileContents = new JSONObject(stringBuilder.toString());
+                }
+
+            }
+
+            return fileContents;
+
+        } catch (Exception e) {
+            System.out.println("Error reading file: " + fileName);
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

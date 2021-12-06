@@ -1,3 +1,4 @@
+import analytics.Analytics;
 import logGenerator.Logger;
 import queries.Queries;
 import state.State;
@@ -68,7 +69,7 @@ public class Main {
                         	DataModel.menu();
                             break;
                         case 4:
-//                        analytics page
+                            Analytics.menu(state);
                             break;
                         case 5:
                             state.setUserLoggedIn(false);
