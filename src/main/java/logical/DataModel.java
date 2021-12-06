@@ -42,7 +42,7 @@ public class DataModel {
 	
 	public static void createModel(String databaseName) {
 		String path = "databases/" + databaseName;
-		String dataModelFile = databaseName + "_ERD_MODEL";
+		String dataModelFile = "ERD/" + databaseName + "_ERD_MODEL";
 		StringBuilder fileContent = new StringBuilder();
 		fileContent.append("****************************************************Entity Relationship Diagram for database " + databaseName + "****************************************************" + "\n\n");
 		List<String> tableNames = fileReadWrite.getDirectories(path);

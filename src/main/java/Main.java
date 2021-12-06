@@ -90,7 +90,7 @@ public class Main {
             System.out.println("\n\nExiting...");
         } catch(Exception e){
             e.printStackTrace();
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage()) ;
         }
     }
 }
