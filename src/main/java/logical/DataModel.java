@@ -1,5 +1,7 @@
 package logical;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import utilities.ConsoleReader;
 import utilities.FileReadWrite;
@@ -49,6 +51,9 @@ public class DataModel {
 		fileContent.append("Total number of relations/tables in the database " + databaseName + " = " + tableNames.size() + "\n\n");
 		//System.out.println(tableNames);
 		
+		HashMap<String, String> tableFirstColumns = new HashMap<String, String>();
+		HashMap<String, String> primaryKeys = new HashMap<String, String>();
+		
 		for(String tableName : tableNames) {
 			int columnNumber = 0;
 			String columnName = "";
@@ -65,7 +70,49 @@ public class DataModel {
 					columnNumber++;
 					
 					if(columnNumber == 1) {
-						fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + " (PRIMARY KEY)" +"\n");
+						tableFirstColumns.put(tableName, columnName.toLowerCase());
+					}
+				}
+				
+			}
+		}
+		
+		for(String tableName : tableFirstColumns.keySet()) {
+			if(!primaryKeys.keySet().contains(tableFirstColumns.get(tableName))) {
+				primaryKeys.put(tableFirstColumns.get(tableName), tableName);
+			}
+			else {
+				primaryKeys.put(tableFirstColumns.get(tableName), primaryKeys.get(tableFirstColumns.get(tableName)) + ", " +  tableName);
+			}
+			
+		}
+		
+		System.out.println(primaryKeys);
+		
+		for(String tableName : tableNames) {
+			int columnNumber = 0;
+			String columnName = "";
+			String tableMetaData = fileReadWrite.readFile(path + "/" + tableName + "/METADATA");
+			String tableMetaDataParts[];
+			tableMetaDataParts = tableMetaData.split("\n");
+
+			for(String part : tableMetaDataParts) {
+				if(part.contains("TABLE")) {
+					continue;
+				}
+				else if(part.contains("COLUMN")) {
+					columnName = part.substring(part.indexOf("^") + 1).substring(0, part.substring(part.indexOf("^") + 1).indexOf("^"));
+					columnNumber++;
+					
+					if(columnNumber == 1) {
+						System.out.println(primaryKeys.get(columnName.toLowerCase()));
+						System.out.println(primaryKeys.get(columnName.toLowerCase()).contains(","));
+						if(primaryKeys.get(columnName.toLowerCase()).contains(",")) {
+							fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + " (PRIMARY KEY)" + " [Primary/Foreign Key relationship on Column: " + columnName + " among tables: " + primaryKeys.get(columnName.toLowerCase()) +  "\n");
+						}
+						else {
+							fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + " (PRIMARY KEY)" +"\n");
+						}
 					}
 					else {
 						fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + "\n");

@@ -1,0 +1,3 @@
+TABLE^user_accounts
+COLUMN^id^int
+COLUMN^account_number^int
