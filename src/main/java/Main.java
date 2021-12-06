@@ -1,3 +1,4 @@
+import export.Export;
 import queries.Queries;
 import state.State;
 import user.User;
@@ -8,6 +9,7 @@ public class Main {
     public static ConsoleReader reader = new ConsoleReader();
     public static State state = new State();
 
+    
     public static void main(String[] args) {
 
         try{
@@ -58,7 +60,7 @@ public class Main {
                             Queries.menu(state);
                             break;
                         case 2:
-//                        export page
+                            Export.show(state);
                             break;
                         case 3:
 //                        data model page
