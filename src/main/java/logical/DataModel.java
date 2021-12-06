@@ -64,7 +64,12 @@ public class DataModel {
 					columnName = part.substring(part.indexOf("^") + 1).substring(0, part.substring(part.indexOf("^") + 1).indexOf("^"));
 					columnNumber++;
 					
-					fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + "\n");
+					if(columnNumber == 1) {
+						fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + " (PRIMARY KEY)" +"\n");
+					}
+					else {
+						fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + "\n");
+					}
 				}
 				
 			}
