@@ -1,5 +1,8 @@
 package utilities;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.*;
 import java.io.*;
 
@@ -11,6 +14,11 @@ public class FileReadWrite {
 
         StringBuilder stringBuilder = new StringBuilder();
         String fileName = rootPath + path + ".data";
+
+        File file = new File(fileName);
+        if(!file.exists()){
+            return null;
+        }
 
         try {
 
@@ -101,5 +109,86 @@ public class FileReadWrite {
             }
         }
         directory.delete();
+    }
+
+    public void addToJsonArray (String path, JSONObject object) {
+        String fileName = rootPath + path + ".json";
+
+        try {
+            File file = new File(fileName);
+            file.getParentFile().mkdirs();
+
+
+            StringBuilder stringBuilder = new StringBuilder();
+            JSONObject fileContents = null;
+
+            if(file.exists()){
+                FileReader fileReader = new FileReader(fileName);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                String currentLine = null;
+                while ((currentLine = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(currentLine).append("\n");
+                }
+                bufferedReader.close();
+                if(stringBuilder.length() > 0) {
+                    fileContents = new JSONObject(stringBuilder.toString());
+                }
+            }
+
+            if(fileContents == null || fileContents.length() == 0){
+                fileContents = new JSONObject();
+                fileContents.put("logs", new JSONArray());
+            }
+
+            JSONArray jsonArray = fileContents.getJSONArray("logs");
+            jsonArray.put(object);
+
+            FileWriter fileWriter = new FileWriter(file);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+
+            printWriter.print(fileContents.toString());
+
+            printWriter.close();
+            fileWriter.close();
+        } catch (Exception e) {
+            System.out.println("Error writing file: " + fileName);
+            e.printStackTrace();
+        }
+    }
+
+    public JSONObject readLogFile(String path){
+        String fileName = rootPath + path + ".json";
+
+        try {
+            File file = new File(fileName);
+            file.getParentFile().mkdirs();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            JSONObject fileContents = null;
+
+            if (file.exists()) {
+                FileReader fileReader = new FileReader(fileName);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                String currentLine = null;
+                while ((currentLine = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(currentLine).append("\n");
+                }
+                bufferedReader.close();
+                if (stringBuilder.length() > 0) {
+                    fileContents = new JSONObject(stringBuilder.toString());
+                }
+
+            }
+
+            return fileContents;
+
+        } catch (Exception e) {
+            System.out.println("Error reading file: " + fileName);
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

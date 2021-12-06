@@ -4,9 +4,11 @@ public class State {
     private String userName;
     private String activeDatabase;
     private Boolean userLoggedIn;
+    private String lastUsedTable;
 
     public State() {
         this.userLoggedIn = false;
+        this.lastUsedTable = "";
     }
 
     public String getUserName() {
@@ -31,5 +33,13 @@ public class State {
 
     public void setUserLoggedIn(Boolean userLoggedIn) {
         this.userLoggedIn = userLoggedIn;
+    }
+
+    public String getLastUsedTable() {
+        return lastUsedTable;
+    }
+
+    public void setLastUsedTable(String lastUsedTable) {
+        this.lastUsedTable = lastUsedTable;
     }
 }

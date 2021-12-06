@@ -1,13 +1,17 @@
 import export.Export;
+import analytics.Analytics;
+import logGenerator.Logger;
 import queries.Queries;
 import state.State;
 import user.User;
 import utilities.ConsoleReader;
+import logical.DataModel;
 
 public class Main {
 
     public static ConsoleReader reader = new ConsoleReader();
     public static State state = new State();
+    public static Logger logger = new Logger();
 
     
     public static void main(String[] args) {
@@ -21,12 +25,12 @@ public class Main {
                 System.out.println("2. Register");
                 System.out.println("3. Exit");
 
-                System.out.print("\nOption>");
+
                 int option = reader.readInt();
 
                 switch (option) {
                     case 1:
-                        state.setUserLoggedIn(User.login());
+                        state.setUserLoggedIn(User.login(state));
                         break;
                     case 2:
                         User.register();
@@ -44,6 +48,7 @@ public class Main {
             }
 
             if(state.getUserLoggedIn()) {
+                logger.eventLog("LOGIN", "User logged in.", state);
                 while (true) {
                     System.out.println("\n\nPlease select an option:");
                     System.out.println("1. Write Queries");
@@ -63,10 +68,10 @@ public class Main {
                             Export.show(state);
                             break;
                         case 3:
-//                        data model page
+                        	DataModel.menu();
                             break;
                         case 4:
-//                        analytics page
+                            Analytics.menu(state);
                             break;
                         case 5:
                             state.setUserLoggedIn(false);

@@ -1,0 +1,3 @@
+TABLE^users
+COLUMN^id^int
+COLUMN^name^string
