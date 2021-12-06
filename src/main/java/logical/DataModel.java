@@ -1,7 +1,6 @@
 package logical;
 
 import java.util.List;
-
 import utilities.ConsoleReader;
 import utilities.FileReadWrite;
 
@@ -45,7 +44,7 @@ public class DataModel {
 		String path = "databases/" + databaseName;
 		String dataModelFile = databaseName + "_ERD_MODEL";
 		StringBuilder fileContent = new StringBuilder();
-		fileContent.append("**************************Entity Relationship Diagram for database " + databaseName + "**************************" + "\n\n");
+		fileContent.append("****************************************************Entity Relationship Diagram for database " + databaseName + "****************************************************" + "\n\n");
 		List<String> tableNames = fileReadWrite.getDirectories(path);
 		fileContent.append("Total number of relations/tables in the database " + databaseName + " = " + tableNames.size() + "\n\n");
 		//System.out.println(tableNames);
@@ -69,7 +68,8 @@ public class DataModel {
 				}
 				
 			}
+			fileContent.append("\n");
 		}
-		fileReadWrite.writeFile(dataModelFile, fileContent.toString());
+		fileReadWrite.overWriteFile(dataModelFile, fileContent.toString());
 	}	
 }
