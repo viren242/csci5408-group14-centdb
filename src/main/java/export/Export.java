@@ -29,7 +29,6 @@ public class Export {
 
     public static void show(State state) {
         System.out.println("-------------");
-        System.out.println("Calling show");
         while (true) {
 
             System.out.println("Use the schema to perform SQL Dumb");
@@ -37,7 +36,7 @@ public class Export {
             String query = reader.readString();
             String[] queryParts = query.split(" ");
 
-            if (queryParts[0].equalsIgnoreCase("use") && queryParts[1].equalsIgnoreCase("database")) {
+            if (queryParts[0].equalsIgnoreCase("export") && queryParts[1].equalsIgnoreCase("database")) {
                 useDatabase(queryParts[2], state);
                 String queryTemp = reader.readString();
                 if (queryTemp.equalsIgnoreCase("yes")) {
