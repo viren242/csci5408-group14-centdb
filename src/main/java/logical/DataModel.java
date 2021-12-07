@@ -1,6 +1,5 @@
 package logical;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import utilities.ConsoleReader;
@@ -49,7 +48,6 @@ public class DataModel {
 		fileContent.append("****************************************************Entity Relationship Diagram for database " + databaseName + "****************************************************" + "\n\n");
 		List<String> tableNames = fileReadWrite.getDirectories(path);
 		fileContent.append("Total number of relations/tables in the database " + databaseName + " = " + tableNames.size() + "\n\n");
-		//System.out.println(tableNames);
 		
 		HashMap<String, String> tableFirstColumns = new HashMap<String, String>();
 		HashMap<String, String> primaryKeys = new HashMap<String, String>();
@@ -73,7 +71,6 @@ public class DataModel {
 						tableFirstColumns.put(tableName, columnName.toLowerCase());
 					}
 				}
-				
 			}
 		}
 		
@@ -87,7 +84,6 @@ public class DataModel {
 			
 		}
 		
-		System.out.println(primaryKeys);
 		
 		for(String tableName : tableNames) {
 			int columnNumber = 0;
@@ -105,8 +101,6 @@ public class DataModel {
 					columnNumber++;
 					
 					if(columnNumber == 1) {
-						System.out.println(primaryKeys.get(columnName.toLowerCase()));
-						System.out.println(primaryKeys.get(columnName.toLowerCase()).contains(","));
 						if(primaryKeys.get(columnName.toLowerCase()).contains(",")) {
 							fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + " (PRIMARY KEY)" + " [Primary/Foreign Key relationship on Column: " + columnName + " among tables: " + primaryKeys.get(columnName.toLowerCase()) +  "\n");
 						}
@@ -118,7 +112,29 @@ public class DataModel {
 						fileContent.append("TABLE NAME: " + tableName + " ::" + " COLUMN_NAME_" + columnNumber + " : "+ columnName + "\n");
 					}
 				}
-				
+				else if(part.contains("RELATION")) {
+					String[] relation_parts = part.substring(part.indexOf("^") + 1).split(" ");
+					String table1 = relation_parts[1];
+					String table2 = relation_parts[4];
+					String cardinality1 = relation_parts[0];
+					String cardinality2 = relation_parts[3];
+					
+					String cardinality = "NOT FOUND";
+					
+					if(cardinality1.equalsIgnoreCase("many") && cardinality2.equalsIgnoreCase("one")) {
+						cardinality = "N:1";
+					}
+					else if(cardinality1.equalsIgnoreCase("many") && cardinality2.equalsIgnoreCase("many")) {
+						cardinality = "N:N";
+					}
+					else if(cardinality1.equalsIgnoreCase("one") && cardinality2.equalsIgnoreCase("many")) {
+						cardinality = "1:N";
+					}
+					else if(cardinality1.equalsIgnoreCase("one") && cardinality2.equalsIgnoreCase("one")) {
+						cardinality = "1:1";
+					}
+					fileContent.append("Cardinality = " + cardinality + " from TABLE-" + table1.toUpperCase() + " to TABLE-" + table2.toUpperCase() + "\n");
+				}
 			}
 			fileContent.append("\n");
 		}
