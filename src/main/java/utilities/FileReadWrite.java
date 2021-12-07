@@ -191,4 +191,16 @@ public class FileReadWrite {
 
         return null;
     }
+    
+    public boolean checkDirectory(String path) {
+    	
+        File directory = new File(rootPath + path);
+        File[] files = directory.listFiles();
+        if(files != null) {
+        	return true;
+        }
+        else {
+        	return false;
+        }  
+    }
 }
