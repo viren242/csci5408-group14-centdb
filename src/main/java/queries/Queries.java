@@ -59,11 +59,13 @@ public class Queries {
         } else if (queryParts[0].equalsIgnoreCase("drop")) {
             logger.eventLog("DROP_TABLE", "A table has been dropped", state);
             dropTable(query);
+        } else if (queryParts[0].equalsIgnoreCase("define") && queryParts[1].equalsIgnoreCase("relation")) {
+            defineRelation(query);
         } else if (queryParts[0].equalsIgnoreCase("begin") && queryParts[1].equalsIgnoreCase("transaction;")) {
             logger.eventLog("TRANSACTION_START", "A new transaction has started", state);
             Transaction();
             logger.eventLog("TRANSACTION_END", "The transaction has ended", state);
-        }
+        }   
 
         logger.queryLog(query, state);
         state.setLastUsedTable("");
@@ -519,6 +521,44 @@ public class Queries {
 
         System.out.println("Drop Table successful.");
     }
+    
+    public static void defineRelation(String query){
+    	if (state.getActiveDatabase() == null) {
+            System.out.println("Please use a database first.");
+            return;
+    	}
+    	
+    	String databaseName = state.getActiveDatabase();
+    	
+            
+            String[] queryExpressions = query.split(" ");
+            String cardinality1 = queryExpressions[2];
+            String cardinality2 = queryExpressions[5];
+            String table1 = queryExpressions[3];
+            String table2 = queryExpressions[6];
+            
+            String relation = "\nRELATION^" + queryExpressions[2] + " " + queryExpressions[3] + " " + queryExpressions[4] + " " + queryExpressions[5] + " " + queryExpressions[6];
+            
+            if(queryExpressions.length == 7 && (cardinality1.equalsIgnoreCase("many") || cardinality1.equalsIgnoreCase("one"))
+            		&& (cardinality2.equalsIgnoreCase("many") || cardinality2.equalsIgnoreCase("one"))) {
+            	String path1 = "databases/" + databaseName + "/" + table1;
+            	String path2 = "databases/" + databaseName + "/" + table2;
+            	
+            	if(fileReadWrite.checkDirectory(path1) && fileReadWrite.checkDirectory(path2)) {
+            		fileReadWrite.writeFile(path1 + "/" + "METADATA", relation);
+            		fileReadWrite.writeFile(path2 + "/" + "METADATA", relation);
+            	}
+            	else {
+            		System.out.println("No such table(s) exist");
+            		System.out.println("Invalid syntax. Please use the following syntax: DEFINE RELATION <CARDINALITY1> <TABLE_1> <RELATION_SHIP> <CARDINALITY2> <TABLE_2>");
+            	}
+            }
+            else {
+            	System.out.println("Invalid syntax. Please use the following syntax: DEFINE RELATION <CARDINALITY1> <TABLE_1> <RELATION_SHIP> <CARDINALITY2> <TABLE_2>");
+            	System.out.println("Allowed values of CARDINALITY1 and CARDINALITY2 are 'MANY' OR 'ONE'");
+            }
+            System.out.println("Relation defined successfully.");   
+        }
 
     public static void Transaction() {
         System.out.print("\nTransaction has started");
