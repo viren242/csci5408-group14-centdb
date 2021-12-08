@@ -16,11 +16,14 @@ import java.io.Writer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 public class Export {
 
 
-    private final static String BASE_EXPORT_PATH = System.getProperty("user.dir") + "/centdb-exports";
+    private final static String EXPORT_PATH = System.getProperty("user.dir") + "/centdb-exports";
 
     String sqlExport ="";
 
@@ -100,14 +103,14 @@ public class Export {
                 return;
             }
         }
-        System.out.println(sqlExport);
+        sqlExport += "-- Dump completed on " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
         try{
-            File exportsDir = new File(BASE_EXPORT_PATH);
+            File exportsDir = new File(EXPORT_PATH);
             if(!exportsDir.exists()){
                 exportsDir.mkdir();
             }
-            File sql = new File(BASE_EXPORT_PATH + "/" + state.getActiveDatabase() + ".sql");
+            File sql = new File(EXPORT_PATH + "/" + state.getActiveDatabase() + ".sql");
             
             if (sql.createNewFile()) {
                 System.out.println("File created: " + state.getActiveDatabase() + ".sql");
@@ -144,14 +147,11 @@ public class Export {
             
         }
         sqlCreateQuery += ")";
-        // System.out.println(dropQuery);
-        // System.out.println(sqlCreateQuery);
-        // System.out.println("\n");
+        
         return sqlCreateQuery;
     }
     private static String generateSqlInsertQuery(String tableName, State state, String metadata, String data){
 
-        // String sqlInsertQuery = "LOCK TABLES '" +tableName +"' WRITE" +"\n";
 
         String sqlInsertQuery = "";
         List<String> dataLineByLine = Utility.readStringByLines(data);
@@ -173,11 +173,7 @@ public class Export {
             }
         }
         sqlInsertQuery += "\n\n";
-        // System.out.println(lockTables);
-        // System.out.println(sqlInsertQuery);
       
-        // System.out.println("\n");
-        // return sqlInsertQuery;
         return sqlInsertQuery;
     }
 
