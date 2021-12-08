@@ -1,8 +1,6 @@
 package queries;
 
 import logGenerator.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import state.State;
 import utilities.ConsoleReader;
 import utilities.FileReadWrite;
@@ -576,7 +574,6 @@ public class Queries {
     public static void Transaction() {
         System.out.print("\nTransaction has started");
         System.out.print("\nTRANSACTION>");
-        // ArrayList<String> transaction = new ArrayList<String>();
         String transaction = "";
         String input = null;
         while (!"Commit;".equalsIgnoreCase(input)) {
@@ -591,122 +588,125 @@ public class Queries {
                 transaction = transaction + input;
         }
 
-        System.out.println("Transaction = " + transaction);
         String[] transactionParts = transaction.split(";");
         String[] transactionQuery;
         String query;
         String tableName;
         for (int i = 0; i < transactionParts.length; i++) {
-            System.out.println(transactionParts[i]);
+
             query = transactionParts[i];
             transactionQuery = query.split(" ");
+            if(transactionQuery[i].equalsIgnoreCase("use")) {
+                processQuery(transactionParts[i]);
+            }
             // Insert here
             if (transactionQuery[0].equalsIgnoreCase("Insert")) {
                 System.out.println("insert here");
                 tableName = transactionQuery[2];
-                if (state.getActiveDatabase() == null) {
-                    System.out.println("Please use a database first.");
-                    return;
+                String checkTableContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG");
+                 String compareString = tableName + " " + "1";
+                if (compareString.trim().equals(checkTableContent.trim())) {
+                    System.out.println("table in use wait");
                 }
+                else {
+                    if (state.getActiveDatabase() == null) {
+                        System.out.println("Please use a database first.");
+                        return;
+                    }
 
-                List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
+                    List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
 
-                tableName = tableName.trim();
-                String[] tableNameParts = tableName.split("\\(");
-                tableName = tableNameParts[0].trim();
+                    tableName = tableName.trim();
+                    String[] tableNameParts = tableName.split("\\(");
+                    tableName = tableNameParts[0].trim();
 
-                if (!tableList.contains(tableName.toUpperCase())) {
-                    System.out.println("Table does not exist. Please create a table first.");
-                    return;
-                }
+                    if (!tableList.contains(tableName.toUpperCase())) {
+                        System.out.println("Table does not exist. Please create a table first.");
+                        return;
+                    }
 
-                String tableMetaContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/METADATA");
+                    String tableMetaContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/METADATA");
 
-                Pattern pattern = Pattern.compile("\\((.*?)\\)", Pattern.CASE_INSENSITIVE);
-                Matcher matcher = pattern.matcher(query);
-                String[] insertValues = null;
+                    Pattern pattern = Pattern.compile("\\((.*?)\\)", Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(query);
+                    String[] insertValues = null;
 
-                if (matcher.find()) {
-                    insertValues = matcher.group(1).split(",");
-                } else {
-                    System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
-                }
+                    if (matcher.find()) {
+                        insertValues = matcher.group(1).split(",");
+                    } else {
+                        System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
+                    }
 
-                String[] tableMetaParts = tableMetaContent.split("\n");
-                int columnCount = 0;
-                for (String tableMetaPart : tableMetaParts) {
-                    if (tableMetaPart.startsWith("COLUMN")) {
-                        String[] columnMetaParts = tableMetaPart.split("\\^");
-                        String columnName = columnMetaParts[1];
-                        String columnType = columnMetaParts[2];
+                    String[] tableMetaParts = tableMetaContent.split("\n");
+                    int columnCount = 0;
+                    for (String tableMetaPart : tableMetaParts) {
+                        if (tableMetaPart.startsWith("COLUMN")) {
+                            String[] columnMetaParts = tableMetaPart.split("\\^");
+                            String columnName = columnMetaParts[1];
+                            String columnType = columnMetaParts[2];
 
-                        if (columnType.equals("int")) {
-                            try {
-                                assert insertValues != null;
-                                Integer.parseInt(insertValues[columnCount]);
-                            } catch (Exception e) {
-                                System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
-                                return;
-                            }
-                        } else if (columnType.equals("varchar")) {
-                            try {
-                                assert insertValues != null;
-                                if (insertValues[columnCount] == null) {
+                            if (columnType.equals("int")) {
+                                try {
+                                    assert insertValues != null;
+                                    Integer.parseInt(insertValues[columnCount]);
+                                } catch (Exception e) {
                                     System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
                                     return;
                                 }
-                            } catch (Exception e) {
-                                System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
-                                return;
+                            } else if (columnType.equals("varchar")) {
+                                try {
+                                    assert insertValues != null;
+                                    if (insertValues[columnCount] == null) {
+                                        System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
+                                        return;
+                                    }
+                                } catch (Exception e) {
+                                    System.out.println("Invalid syntax. Please use the following syntax: insert into <tableName> values (value, value, ...)");
+                                    return;
+                                }
                             }
+                            columnCount++;
                         }
-                        columnCount++;
+                    }
+
+                    StringBuilder rowContent = new StringBuilder();
+                    List a = new ArrayList();
+                    assert insertValues != null;
+                    for (String insertValue : insertValues) {
+                        rowContent.append(insertValue.trim()).append("^");
+                    }
+                    rowContent.deleteCharAt(rowContent.length() - 1);
+                    rowContent.append("\n");
+                    String rowValues = rowContent.toString();
+                    List myList = new ArrayList();
+                    myList.add(rowValues);
+                    System.out.println("DO you want to insert the changes entre Y or N");
+                    Scanner scanner = new Scanner(System.in);
+                    String userInput = scanner.nextLine();
+                    if (userInput.equalsIgnoreCase("y")) {
+                        fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG", "");
+                        System.out.println("Inserted Successfully");
+
+                    } else {
+                        System.out.println("entre the new values seperated by ^");
+                        userInput = scanner.nextLine();
+                        myList.clear();
+                        myList.add(userInput);
+
+                        fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG", "");
+                        System.out.println("Inserted Successfully");
+
+
                     }
                 }
-
-                StringBuilder rowContent = new StringBuilder();
-                List a = new ArrayList();
-                assert insertValues != null;
-                for (String insertValue : insertValues) {
-                    rowContent.append(insertValue.trim()).append("^");
-                }
-                rowContent.deleteCharAt(rowContent.length() - 1);
-                rowContent.append("\n");
-                System.out.println(rowContent);
-                String rowValues = rowContent.toString();
-                List myList = new ArrayList();
-                myList.add(rowValues);
-                System.out.println(myList.get(0));
-                System.out.println("DO you want to insert the changes entre Y or N");
-                Scanner scanner = new Scanner(System.in);
-                String userInput = scanner.nextLine();
-                if (userInput.equalsIgnoreCase("y")) {
-                    fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
-
-                    System.out.println("Inserted Successfully");
-
-                } else {
-                    System.out.println("entre the new values seperated by ^");
-                    userInput = scanner.nextLine();
-                    myList.clear();
-                    myList.add(userInput);
-
-                    fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
-                    System.out.println("Inserted Successfully");
-
-
-                }
             }
-            String flag = "0";
             String logFlag;
-            // update here
             if (transactionQuery[0].equalsIgnoreCase("Update")) {
                 tableName = transactionQuery[1];
                 String checkTableContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG");
-                System.out.println("table check 1 " + checkTableContent);
-                String compareString = tableName + " " + "1";
-                System.out.println("compare string " + compareString.length());
-                System.out.println("compare string 1 " + checkTableContent.length());
+                 String compareString = tableName + " " + "1";
                 if (compareString.trim().equals(checkTableContent.trim())) {
                     System.out.println("table in use wait");
                 } else {
@@ -717,23 +717,61 @@ public class Queries {
                         System.out.println("Please use a database first.");
                         return;
                     }
-
                     Pattern pattern = Pattern.compile("UPDATE(\\s.*)SET(\\s.*)WHERE(\\s.*)", Pattern.CASE_INSENSITIVE);
                     Matcher matcher = pattern.matcher(query);
-
-                    tableName = null;
                     String setClause = null;
                     String whereClause = null;
-
                     if (matcher.find()) {
                         tableName = matcher.group(1).trim();
+                        state.setLastUsedTable(tableName);
                         setClause = matcher.group(2).trim();
                         whereClause = matcher.group(3).trim();
                     } else {
                         System.out.println("Invalid syntax. Please use the following syntax: UPDATE <tableName> SET <columnName> = <value> WHERE <condition>");
                         return;
                     }
+                   String updateValues = whereClauseUpdate(setClause,whereClause,tableName);
+                    List myList = new ArrayList();
+                    myList.add(updateValues);
+                    System.out.println("DO you want to update the changes entre Y or N");
+                    Scanner scanner = new Scanner(System.in);
+                    String userInput = scanner.nextLine();
+                    if (userInput.equalsIgnoreCase("y")) {
+                        System.out.println("update values here" + myList.get(0));
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG", "");
+                        System.out.println("Update successful.");
+                    } else {
+                        System.out.println("entre the new values seperated with column name");
+                        userInput = scanner.nextLine();
+                        myList.clear();
+                        String[] myListPart;
+                        myListPart = userInput.split(" ");
+                        String finalValue = whereClauseUpdate(myListPart[0],myListPart[1],tableName);
+                        myList.add(finalValue);
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA","");
+                        fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG", "");
+                        System.out.println("update Successfully");
 
+                    }
+                }
+            }
+            if (transactionQuery[0].equalsIgnoreCase("delete")) {
+                tableName = transactionQuery[2];
+                String checkTableContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG");
+                String compareString = tableName + " " + "1";
+                if (compareString.trim().equals(checkTableContent.trim())) {
+                    System.out.println("table in use wait");
+                }
+                else {
+                    logFlag = "1";
+                    fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.toUpperCase() + "/QUERYLOG", tableName.trim() + " " + logFlag + "\n");
+                    if (state.getActiveDatabase() == null) {
+                        System.out.println("Please use a database first.");
+                        return;
+                    }
+                    String whereClause = whereClauseDelete(query);
                     List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
                     if (!tableList.contains(tableName.toUpperCase())) {
                         System.out.println("Table does not exist. Please create a table first.");
@@ -751,61 +789,147 @@ public class Queries {
                         }
                     }
 
-                    String[] setClauseParts = setClause.split("=");
-                    String setColumnName = setClauseParts[0];
-                    String setColumnValue = setClauseParts[1];
-
                     String[] whereClauseParts = whereClause.split("=");
                     String whereColumnName = whereClauseParts[0];
                     String whereColumnValue = whereClauseParts[1];
 
                     int whereColumnIndex = allColumnsList.indexOf(whereColumnName);
-                    int setColumnIndex = allColumnsList.indexOf(setColumnName);
 
-                    if (setColumnIndex == -1 || whereColumnIndex == -1) {
-                        System.out.println("Invalid syntax. Please use the following syntax: UPDATE <tableName> SET <columnName> = <value> WHERE <condition>");
+                    if (whereColumnIndex == -1) {
+                        System.out.println("Invalid syntax. Please use the following syntax: DELETE FROM <tableName> WHERE <condition>");
                         return;
                     }
 
                     String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
                     String[] tableDataParts = tableDataContent.split("\n");
                     List<String> rows = new ArrayList<>(Arrays.asList(tableDataParts));
-
-                    for (i = 0; i < rows.size(); i++) {
-                        String[] rowContent = rows.get(i).split("\\^");
-                        if (rowContent[i].equals(whereColumnValue)) {
-                            rowContent[setColumnIndex] = setColumnValue;
-                            rows.set(i, String.join("^", rowContent));
-                        }
-                    }
-
-                    StringBuilder newTableContent = new StringBuilder();
-                    for (String row : rows) {
-                        newTableContent.append(row).append("\n");
-                    }
-                    String updateValues = newTableContent.toString();
-                    List myList = new ArrayList();
-                    myList.add(updateValues);
                     System.out.println("DO you want to update the changes entre Y or N");
                     Scanner scanner = new Scanner(System.in);
                     String userInput = scanner.nextLine();
                     if (userInput.equalsIgnoreCase("y")) {
-                        System.out.println("update values here" + myList.get(0));
-                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
-                        System.out.println("Update successful.");
+                        for (i = 0; i < rows.size(); i++) {
+                            String[] rowContent = rows.get(i).split("\\^");
+                            if (rowContent[whereColumnIndex].equals(whereColumnValue)) {
+                                rows.remove(i);
+                            }
+                        }
+
+                        StringBuilder newTableContent = new StringBuilder();
+                        for (String row : rows) {
+                            newTableContent.append(row).append("\n");
+                        }
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", newTableContent.toString());
                         fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG", "");
-                    } else {
-                        System.out.println("entre the new values seperated by ^");
+                        System.out.println("Delete successful.");
+                    }
+                    else {
+                        System.out.println("enter the new value");
                         userInput = scanner.nextLine();
-                        myList.clear();
-                        myList.add(userInput);
-                        fileReadWrite.writeFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", String.valueOf(myList.get(0)));
-                        System.out.println("update Successfully");
+                         whereClauseParts = userInput.split("=");
+                         whereColumnName = whereClauseParts[0];
+                         whereColumnValue = whereClauseParts[1];
+                        whereColumnIndex = allColumnsList.indexOf(whereColumnName);
+                        if (whereColumnIndex == -1) {
+                            System.out.println("Invalid syntax. Please use the following syntax: DELETE FROM <tableName> WHERE <condition>");
+                            return;
+                        }
+
+                        tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
+                         tableDataParts = tableDataContent.split("\n");
+                         rows = new ArrayList<>(Arrays.asList(tableDataParts));
+                        for (i = 0; i < rows.size(); i++) {
+                            String[] rowContent = rows.get(i).split("\\^");
+                            if (rowContent[whereColumnIndex].equals(whereColumnValue)) {
+                                rows.remove(i);
+                            }
+                        }
+                        StringBuilder newTableContent = new StringBuilder();
+                        for (String row : rows) {
+                            newTableContent.append(row).append("\n");
+                        }
+                        fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA", newTableContent.toString());
                         fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG", "");
+                        System.out.println("Delete successful.");
                     }
                 }
             }
-            processQuery(transactionParts[0]);
+
         }
+
+    }
+    public static String whereClauseUpdate(String setClauseUpdate,String whereClauseUpdate,String tableNameUpdate){
+        String setClause = setClauseUpdate;
+        String whereClause = whereClauseUpdate;
+        String tableName =tableNameUpdate;
+        List<String> tableList = fileReadWrite.getDirectories("databases/" + state.getActiveDatabase());
+        if (!tableList.contains(tableName.toUpperCase())) {
+            System.out.println("Table does not exist. Please create a table first.");
+            return "0";
+        }
+
+        List<String> allColumnsList = new ArrayList<>();
+        String tableMetaContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/METADATA");
+        String[] tableMetaParts = tableMetaContent.split("\n");
+        for (String tableMetaPart : tableMetaParts) {
+            if (tableMetaPart.startsWith("COLUMN")) {
+                String[] columnMetaParts = tableMetaPart.split("\\^");
+                String columnName = columnMetaParts[1];
+                allColumnsList.add(columnName);
+            }
+        }
+
+        String[] setClauseParts = setClause.split("=");
+        String setColumnName = setClauseParts[0];
+        String setColumnValue = setClauseParts[1];
+
+        String[] whereClauseParts = whereClause.split("=");
+        String whereColumnName = whereClauseParts[0];
+        String whereColumnValue = whereClauseParts[1];
+
+        int whereColumnIndex = allColumnsList.indexOf(whereColumnName);
+        int setColumnIndex = allColumnsList.indexOf(setColumnName);
+
+        if (setColumnIndex == -1 || whereColumnIndex == -1) {
+            System.out.println("Invalid syntax. Please use the following syntax: UPDATE <tableName> SET <columnName> = <value> WHERE <condition>");
+            return "";
+        }
+
+        String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
+        String[] tableDataParts = tableDataContent.split("\n");
+        List<String> rows = new ArrayList<>(Arrays.asList(tableDataParts));
+
+        for (int i = 0; i < rows.size(); i++) {
+            String[] rowContent = rows.get(i).split("\\^");
+            if (rowContent[whereColumnIndex].equals(whereColumnValue)) {
+                rowContent[setColumnIndex] = setColumnValue;
+                rows.set(i, String.join("^", rowContent));
+            }
+        }
+        StringBuilder newTableContent = new StringBuilder();
+        for (String row : rows) {
+            newTableContent.append(row).append("\n");
+        }
+        String updateValues = newTableContent.toString();
+
+        return updateValues;
+
+    }
+    public static String whereClauseDelete(String query){
+        Pattern pattern = Pattern.compile("DELETE\\s*FROM(\\s.*)WHERE(\\s.*)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(query);
+
+
+        String whereClause = null;
+        String tableName = null;
+        if (matcher.find()) {
+            tableName = matcher.group(1).trim();
+            state.setLastUsedTable(tableName);
+            whereClause = matcher.group(2).trim();
+            System.out.println("where clause here " + whereClause);
+        } else {
+            System.out.println("Invalid syntax. Please use the following syntax: DELETE FROM <tableName> WHERE <condition>");
+
+        }
+        return whereClause;
     }
 }
