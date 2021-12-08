@@ -244,6 +244,7 @@ public class Queries {
         String whereClause = null;
         String whereColumnName = null;
         String whereColumnValue = null;
+        String whereOperator = null;
 
         if (matcher.find()) {
             columns = matcher.group(1).trim();
@@ -257,13 +258,14 @@ public class Queries {
         }
 
         if (whereClause != null) {
-            Pattern pattern2 = Pattern.compile("(\\w+)(\\s*)(=)(\\s*)(\\w+)", Pattern.CASE_INSENSITIVE);
+            Pattern pattern2 = Pattern.compile("(\\w+)(\\s*)(=|<|>)(\\s*)(\\w+)", Pattern.CASE_INSENSITIVE);
             Matcher matcher2 = pattern2.matcher(whereClause);
             if (!matcher2.find()) {
                 System.out.println("Invalid syntax. Please use the following syntax: select <columns> from <tableName> where <condition>");
             }
 
             whereColumnName = matcher2.group(1);
+            whereOperator = matcher2.group(3);
             whereColumnValue = matcher2.group(5);
         }
 
@@ -308,7 +310,18 @@ public class Queries {
         for (String tableDataPart : tableDataParts) {
             String[] rowContent = tableDataPart.split("\\^");
 
-            if (!query.contains("where") || (query.contains("where") && rowContent[whereColumnIndex].equals(whereColumnValue))) {
+            boolean isValidRow = true;
+            if(query.contains("where")) {
+                if(whereOperator.equals("=") && !rowContent[whereColumnIndex].equals(whereColumnValue)) {
+                    isValidRow = false;
+                } else if(whereOperator.equals("<") && Integer.parseInt(rowContent[whereColumnIndex]) >= Integer.parseInt(whereColumnValue)) {
+                    isValidRow = false;
+                } else if(whereOperator.equals(">") && Integer.parseInt(rowContent[whereColumnIndex]) <= Integer.parseInt(whereColumnValue)) {
+                    isValidRow = false;
+                }
+            }
+
+            if (!query.contains("where") || (query.contains("where") && isValidRow)) {
                 int columnIndex = 0;
                 for (String rowContentPart : rowContent) {
 
