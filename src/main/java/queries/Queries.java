@@ -593,7 +593,7 @@ public class Queries {
         String query;
         String tableName;
         for (int i = 0; i < transactionParts.length; i++) {
-         //   System.out.println(transactionParts[i]);
+
             query = transactionParts[i];
             transactionQuery = query.split(" ");
             if(transactionQuery[i].equalsIgnoreCase("use")) {
@@ -604,10 +604,7 @@ public class Queries {
                 System.out.println("insert here");
                 tableName = transactionQuery[2];
                 String checkTableContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG");
-//                System.out.println("table check 1 " + checkTableContent);
                  String compareString = tableName + " " + "1";
-//                System.out.println("compare string " + compareString.length());
-//                System.out.println("compare string 1 " + checkTableContent.length());
                 if (compareString.trim().equals(checkTableContent.trim())) {
                     System.out.println("table in use wait");
                 }
@@ -680,11 +677,9 @@ public class Queries {
                     }
                     rowContent.deleteCharAt(rowContent.length() - 1);
                     rowContent.append("\n");
-                 //   System.out.println(rowContent);
                     String rowValues = rowContent.toString();
                     List myList = new ArrayList();
                     myList.add(rowValues);
-               //     System.out.println(myList.get(0));
                     System.out.println("DO you want to insert the changes entre Y or N");
                     Scanner scanner = new Scanner(System.in);
                     String userInput = scanner.nextLine();
@@ -707,16 +702,11 @@ public class Queries {
                     }
                 }
             }
-          //  String flag = "0";
             String logFlag;
-            // update here
             if (transactionQuery[0].equalsIgnoreCase("Update")) {
                 tableName = transactionQuery[1];
                 String checkTableContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG");
-//                System.out.println("table check 1 " + checkTableContent);
                  String compareString = tableName + " " + "1";
-//                System.out.println("compare string " + compareString.length());
-//                System.out.println("compare string 1 " + checkTableContent.length());
                 if (compareString.trim().equals(checkTableContent.trim())) {
                     System.out.println("table in use wait");
                 } else {
@@ -736,8 +726,6 @@ public class Queries {
                         state.setLastUsedTable(tableName);
                         setClause = matcher.group(2).trim();
                         whereClause = matcher.group(3).trim();
-//                        System.out.println("set clause here " + setClause);
-//                        System.out.println("where clause here " + whereClause);
                     } else {
                         System.out.println("Invalid syntax. Please use the following syntax: UPDATE <tableName> SET <columnName> = <value> WHERE <condition>");
                         return;
@@ -759,7 +747,6 @@ public class Queries {
                         myList.clear();
                         String[] myListPart;
                         myListPart = userInput.split(" ");
-                     //   System.out.println("my list in no " + myListPart[0]);
                         String finalValue = whereClauseUpdate(myListPart[0],myListPart[1],tableName);
                         myList.add(finalValue);
                         fileReadWrite.overWriteFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA","");
@@ -770,14 +757,10 @@ public class Queries {
                     }
                 }
             }
-            // Delete here
             if (transactionQuery[0].equalsIgnoreCase("delete")) {
                 tableName = transactionQuery[2];
                 String checkTableContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/QUERYLOG");
-//                System.out.println("table check 1 " + checkTableContent);
                 String compareString = tableName + " " + "1";
-//                System.out.println("compare string " + compareString.length());
-//               System.out.println("compare string 1 " + checkTableContent.length());
                 if (compareString.trim().equals(checkTableContent.trim())) {
                     System.out.println("table in use wait");
                 }
@@ -820,10 +803,6 @@ public class Queries {
                     String tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
                     String[] tableDataParts = tableDataContent.split("\n");
                     List<String> rows = new ArrayList<>(Arrays.asList(tableDataParts));
-//                    System.out.println("data to delete " + whereColumnValue);
-//                    System.out.println("data to delete name " + whereColumnName);
-//                    System.out.println("data to delete index " + whereColumnIndex);
-                    // here
                     System.out.println("DO you want to update the changes entre Y or N");
                     Scanner scanner = new Scanner(System.in);
                     String userInput = scanner.nextLine();
@@ -858,9 +837,6 @@ public class Queries {
                         tableDataContent = fileReadWrite.readFile("databases/" + state.getActiveDatabase() + "/" + tableName.trim().toUpperCase() + "/DATA");
                          tableDataParts = tableDataContent.split("\n");
                          rows = new ArrayList<>(Arrays.asList(tableDataParts));
-//                        System.out.println("data to delete " + whereColumnValue);
-//                        System.out.println("data to delete name " + whereColumnName);
-//                        System.out.println("data to delete index " + whereColumnIndex);
                         for (i = 0; i < rows.size(); i++) {
                             String[] rowContent = rows.get(i).split("\\^");
                             if (rowContent[whereColumnIndex].equals(whereColumnValue)) {
@@ -927,7 +903,6 @@ public class Queries {
             if (rowContent[whereColumnIndex].equals(whereColumnValue)) {
                 rowContent[setColumnIndex] = setColumnValue;
                 rows.set(i, String.join("^", rowContent));
-                // System.out.println("row content herr" + rowContent[i]);
             }
         }
         StringBuilder newTableContent = new StringBuilder();
