@@ -52,6 +52,7 @@ public class DataModel {
 		HashMap<String, String> tableFirstColumns = new HashMap<String, String>();
 		HashMap<String, String> primaryKeys = new HashMap<String, String>();
 		
+		//Primary Key Implementation
 		for(String tableName : tableNames) {
 			int columnNumber = 0;
 			String columnName = "";
@@ -84,6 +85,34 @@ public class DataModel {
 			
 		}
 		
+		//Foreign Key Implementation
+		for(String pK : primaryKeys.keySet()) {
+			if(!primaryKeys.get(pK).contains(",")) {
+				for(String tableName : tableNames) {
+					int columnNumber = 0;
+					String columnName = "";
+					String tableMetaData = fileReadWrite.readFile(path + "/" + tableName + "/METADATA");
+					String tableMetaDataParts[];
+					tableMetaDataParts = tableMetaData.split("\n");
+
+					for(String part : tableMetaDataParts) {
+						if(part.contains("TABLE")) {
+							continue;
+						}
+						else if(part.contains("COLUMN")) {
+							columnName = part.substring(part.indexOf("^") + 1).substring(0, part.substring(part.indexOf("^") + 1).indexOf("^"));
+							columnNumber++;
+							
+							if(columnName.equalsIgnoreCase(pK) && columnNumber != 1) {
+								primaryKeys.put(pK, primaryKeys.get(pK) + ", " + tableName);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		System.out.println(primaryKeys);
 		
 		for(String tableName : tableNames) {
 			int columnNumber = 0;
@@ -139,5 +168,6 @@ public class DataModel {
 			fileContent.append("\n");
 		}
 		fileReadWrite.overWriteFile(dataModelFile, fileContent.toString());
+		System.out.println("ERD generated successfully to the path: src/main/resources/" + dataModelFile + ".data");
 	}	
 }
