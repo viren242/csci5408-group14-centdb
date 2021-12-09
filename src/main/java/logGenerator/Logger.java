@@ -6,11 +6,9 @@ import state.State;
 import utilities.FileReadWrite;
 
 import java.util.List;
-import java.util.Map;
 
 public class Logger {
     public static FileReadWrite fileReadWrite = new FileReadWrite();
-    public static State state;
 
     public void log(JSONObject log, String logType) {
         fileReadWrite.addToJsonArray("logs/" + logType + "/logs" , log);

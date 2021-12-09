@@ -1,6 +1,5 @@
 package analytics;
 
-import logGenerator.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import state.State;
@@ -15,7 +14,6 @@ public class Analytics {
     public static ConsoleReader reader = new ConsoleReader();
     public static FileReadWrite fileReadWrite = new FileReadWrite();
     public static State state;
-    public static Logger logger = new Logger();
 
     public static void menu(State newState) {
 
@@ -50,7 +48,8 @@ public class Analytics {
         for (int i = 0; i < queries.length(); i++) {
             JSONObject query = queries.getJSONObject(i);
 
-            if (query.has("database") && query.getString("database").equalsIgnoreCase(dbName) && query.has("user") && query.getString("user").equalsIgnoreCase(state.getUserName())) {
+            if (query.has("database") && query.getString("database").equalsIgnoreCase(dbName)
+                    && query.has("user") && query.getString("user").equalsIgnoreCase(state.getUserName())) {
                 count++;
             }
         }
@@ -74,7 +73,10 @@ public class Analytics {
             int count = 0;
             for (int i = 0; i < queries.length(); i++) {
                 JSONObject query = queries.getJSONObject(i);
-                if (query.has("database") && query.getString("database").equalsIgnoreCase(dbName) && query.has("table") && query.getString("table").equalsIgnoreCase(table) && query.has("user") && query.getString("user").equalsIgnoreCase(state.getUserName())) {
+                if (query.has("database") && query.getString("database").equalsIgnoreCase(dbName)
+                        && query.has("table") && query.getString("table").equalsIgnoreCase(table)
+                        && query.has("user") && query.getString("user").equalsIgnoreCase(state.getUserName())
+                        && query.has("query") && query.getString("query").contains("UPDATE")) {
                     count++;
                 }
             }
